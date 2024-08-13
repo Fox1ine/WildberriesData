@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 # Initialize the logger
 logger = logging.getLogger(__name__)
 
-
+#Wait until the specified element is visible on the page.
 def sleep_until_visible(driver, locator):
     """Wait until the specified element is visible."""
     return WebDriverWait(driver, SELENIUM_EXPLICIT_WAIT).until(

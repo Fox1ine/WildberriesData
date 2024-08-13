@@ -4,10 +4,11 @@ from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
 
 
+# Explicit wait time for Selenium in seconds
 SELENIUM_EXPLICIT_WAIT = 10
 
 
-# Опции для WebDriver
+# WebDriver options
 headers = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -19,7 +20,7 @@ service = Service(GeckoDriverManager().install())
 options = webdriver.FirefoxOptions()
 options.add_argument('--headless')  # Run Firefox in headless mode (without GUI)
 
-# Конфигурация логгирования
+# Logging configuration
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
