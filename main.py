@@ -6,6 +6,7 @@ import pandas as pd
 from my_config import SELENIUM_EXPLICIT_WAIT, headers, service, options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from pipeline import clear_data,feature_engineering
 
 
 # Initialize the logger
@@ -151,6 +152,10 @@ def main():
     user_value = input("Enter the name of the desired product: ")
     urls = parse_connect(user_value)
     get_data(urls)
+    cleaned_df = clear_data('result.csv')
+    if cleaned_df is not None:
+        feature_df = feature_engineering(cleaned_df)
+    logger.info('Script finished.')
 
 
 if __name__ == '__main__':
