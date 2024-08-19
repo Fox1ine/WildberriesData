@@ -1,4 +1,5 @@
 import logging
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
@@ -12,11 +13,11 @@ from pipeline import clear_data,feature_engineering
 # Initialize the logger
 logger = logging.getLogger(__name__)
 
-def logger_value(value, massage_if_exist, massage_if_not_exist):
+def logger_value(value, message_if_exist, message_if_not_exist):
     if value:
-        logger.info(massage_if_exist)
+        logger.info(message_if_exist)
     else:
-        logger.warning(massage_if_not_exist)
+        logger.warning(message_if_not_exist)
 
 
 #Wait until the specified element is visible on the page.
@@ -108,26 +109,28 @@ def get_data(urls_list):
 
                 result_list.append(
                     {
-                        'item_url': url,
-                        'item_name': item_name,
-                        'item_company_name': item_company_name,
-                        'item_product_rating': item_product_rating,
-                        'item_count_reviews': item_count_reviews,
-                        'item_price': item_price,
-                        'item_image': images_urls[0] if images_urls else None
+                        'url': url,
+                        'name': item_name,
+                        'company_name': item_company_name,
+                        'product_rating': item_product_rating,
+                        'count_reviews': item_count_reviews,
+                        'price': item_price,
+                        'image': images_urls[0] if images_urls else None
                     }
                 )
 
             except Exception as err:
                 logger.error(f"Error processing {url}: {err}")
-            
-            try:
-                # Save to CSV
-                df = pd.DataFrame(result_list)
-                df.to_csv("result.csv", index=False, encoding='utf-8', quoting=1) 
-                logger.info("Data successfully saved to 'result.csv'")
-            except Exception as err:
-                logger.error(f"Something went wrong, file 'result.csv' - was not completed")
+
+        # Save to CSV
+        df = pd.DataFrame(result_list)
+        df.to_csv("result.csv", index=False, encoding='utf-8', quoting=1) 
+        if os.path.exists("./result.csv"):  
+            logger.info("Data successfully saved to 'result.csv'")
+        else:
+            logger.error("File 'result.csv' was not created after saving attempt")
+
+    
 
 
 def parse_connect(user_value: str):
