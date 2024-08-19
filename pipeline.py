@@ -1,12 +1,16 @@
 import logging
+import os
 import pandas as pd
 import numpy as np
-import config
 
 # Initialize the logger
 logger = logging.getLogger(__name__)
 
 def clear_data(file_path):
+    """
+    Load and clean data from a CSV file.
+
+    """
     logger.info('Starting data cleaning process.')
     
     # Load data from CSV file
@@ -45,10 +49,14 @@ def clear_data(file_path):
     return df
 
 def feature_engineering(df):
+    """
+    Perform feature engineering on the DataFrame.
+
+    """
     logger.info('Starting feature engineering process.')
     
     # Calculate average price by brand and discount
-    avg_price_by_brand = df.groupby('company_name')['price'].transform('mean')
+    avg_price_by_brand = df.groupby('brand')['price'].transform('mean')
     df['discount'] = avg_price_by_brand - df['price']
     df['discount'] = df['discount'].round(4)
     logger.info('Discount calculated based on average price by brand.')
@@ -62,11 +70,8 @@ def feature_engineering(df):
     df['rating_category'] = pd.cut(df['product_rating'], bins=[0, 3, 4, 5], labels=['low', 'medium', 'high'])
     logger.info('Rating category assigned.')
 
-   # Rename columns for clarity
-    new_column_name = {
-        'company_name': 'brand'
-    }
-    df = df.rename(columns=new_column_name)
+    # Rename columns for clarity
+    df = df.rename(columns={'company_name': 'brand'})
     logger.info('Columns renamed for clarity.')
 
     # Perform One-Hot Encoding on the brand column
@@ -74,18 +79,16 @@ def feature_engineering(df):
     df_encoded.to_csv('brand_one_hot_encoded.csv', index=False)
     logger.info('One-Hot Encoding performed on brand column and saved to "brand_one_hot_encoded.csv".')
 
-    try:
-        # Save the DataFrame to a Parquet file
-        df.to_parquet('processed_data.parquet', index=False)
+    # Save the DataFrame to a Parquet file
+    df.to_parquet('processed_data.parquet', index=False)
+    if os.path.exists('./processed_data.parquet'):
         logger.info('Data saved to "processed_data.parquet".')
-    except Exception as err:
-        logger.error("Something went wrong, file 'processed_data.parquet' - was not completed")
+    else:
+        logger.error("Something went wrong, file 'processed_data.parquet' was not created.")
     
-
     # Save the final DataFrame to a CSV file after feature engineering
     df.to_csv('final_data_after_feature.csv', index=False)
     logger.info('Final data saved to "final_data_after_feature.csv".')
 
     logger.info('Feature engineering process completed.')
     return df
-
