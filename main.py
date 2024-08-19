@@ -101,20 +101,20 @@ def get_data(urls_list):
             soup = BeautifulSoup(driver.page_source, 'lxml')
 
             try:
-                item_name = extract_item_data(soup, 'h1', "product-page__title")
-                logger_value(item_name, 'Item name collected successfully', 'Item name collected UNsuccessfully')
+                name = extract_item_data(soup, 'h1', "product-page__title")
+                logger_value(name, 'Item name collected successfully', 'Item name collected UNsuccessfully')
                 
-                item_company_name = extract_item_data(soup, 'a', 'product-page__header-brand j-wba-card-item j-wba-card-item-show j-wba-card-item-observe')
-                logger_value(item_company_name, 'Company name collected successfully', 'Company name collected UNsuccessfully')
+                company_name = extract_item_data(soup, 'a', 'product-page__header-brand j-wba-card-item j-wba-card-item-show j-wba-card-item-observe')
+                logger_value(company_name, 'Company name collected successfully', 'Company name collected UNsuccessfully')
 
-                item_product_rating = extract_item_data(soup, 'span', "product-review__rating address-rate-mini address-rate-mini--sm")
-                logger_value(item_product_rating, 'Product rating collected successfully', 'Product rating collected UNsuccessfully')
+                product_rating = extract_item_data(soup, 'span', "product-review__rating address-rate-mini address-rate-mini--sm")
+                logger_value(product_rating, 'Product rating collected successfully', 'Product rating collected UNsuccessfully')
 
-                item_count_reviews = extract_item_data(soup, 'span', 'product-review__count-review j-wba-card-item-show j-wba-card-item-observe')
-                logger_value(item_count_reviews, 'Review count collected successfully', 'Review count collected UNsuccessfully')
+                count_reviews = extract_item_data(soup, 'span', 'product-review__count-review j-wba-card-item-show j-wba-card-item-observe')
+                logger_value(count_reviews, 'Review count collected successfully', 'Review count collected UNsuccessfully')
 
-                item_price = extract_item_data(soup, 'ins', "price-block__final-price wallet")
-                logger_value(item_price, 'Item price collected successfully', 'Item price collected UNsuccessfully')
+                price = extract_item_data(soup, 'ins', "price-block__final-price wallet")
+                logger_value(price, 'Item price collected successfully', 'Item price collected UNsuccessfully')
 
                 images_urls = extract_item_data(soup, 'img', 'photo-zoom__preview j-zoom-image hide', multiple=True, get_attr='src')
                 logger_value(images_urls, 'Image URLs collected successfully', 'Image URLs collected UNsuccessfully')
@@ -122,11 +122,11 @@ def get_data(urls_list):
                 result_list.append(
                     {
                         'url': url,
-                        'name': item_name,
-                        'company_name': item_company_name,
-                        'product_rating': item_product_rating,
-                        'count_reviews': item_count_reviews,
-                        'price': item_price,
+                        'name': name,
+                        'company_name': company_name,
+                        'product_rating': product_rating,
+                        'count_reviews': count_reviews,
+                        'price': price,
                         'image': images_urls[0] if images_urls else None
                     }
                 )
@@ -142,6 +142,7 @@ def get_data(urls_list):
         else:
             logger.error("File 'result.csv' was not created after saving attempt")
 
+
 def parse_connect(user_value: str):
     """
     Parse product URLs based on user input.
@@ -151,6 +152,7 @@ def parse_connect(user_value: str):
     html_content = get_content(url)
     urls = get_item_urls(html_content)
     return urls
+
 
 def main():
     """
