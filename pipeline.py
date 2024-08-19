@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import numpy as np
-import my_config
+import config
 
 # Initialize the logger
 logger = logging.getLogger(__name__)
@@ -62,12 +62,7 @@ def feature_engineering(df):
     df['rating_category'] = pd.cut(df['item_product_rating'], bins=[0, 3, 4, 5], labels=['low', 'medium', 'high'])
     logger.info('Rating category assigned.')
 
-    # Perform One-Hot Encoding on the brand column
-    df_encoded = pd.get_dummies(df['item_company_name'], prefix='brand', drop_first=True)
-    df_encoded.to_csv('brand_one_hot_encoded.csv', index=False)
-    logger.info('One-Hot Encoding performed on brand column and saved to "brand_one_hot_encoded.csv".')
-
-    # Rename columns for clarity
+   # Rename columns for clarity
     new_column_name = {
         'item_url': 'url',
         'item_price': 'price',
@@ -78,14 +73,19 @@ def feature_engineering(df):
     df = df.rename(columns=new_column_name)
     logger.info('Columns renamed for clarity.')
 
-    # Save the DataFrame to a Parquet file
-    df.to_parquet('processed_data.parquet', index=False)
-    logger.info('Data saved to "processed_data.parquet".')
+    # Perform One-Hot Encoding on the brand column
+    df_encoded = pd.get_dummies(df['brand'], prefix='brand', drop_first=True)
+    df_encoded.to_csv('brand_one_hot_encoded.csv', index=False)
+    logger.info('One-Hot Encoding performed on brand column and saved to "brand_one_hot_encoded.csv".')
 
-    # Load the Parquet file to verify its contents
-    df_loaded = pd.read_parquet('processed_data.parquet')
-    logger.info('Data successfully loaded from "processed_data.parquet".')
-    print(df_loaded.head())  # Display the first few rows for verification
+
+    try:
+        # Save the DataFrame to a Parquet file
+        df.to_parquet('processed_data.parquet', index=False)
+        logger.info('Data saved to "processed_data.parquet".')
+    except Exception as err:
+        logger.error("Something went wrong, file 'processed_data.parquet' - was not completed")
+    
 
     # Save the final DataFrame to a CSV file after feature engineering
     df.to_csv('final_data_after_feature.csv', index=False)
@@ -94,7 +94,7 @@ def feature_engineering(df):
     logger.info('Feature engineering process completed.')
     return df
 
-# Example usage:
+
 # Example usage:
 if __name__ == '__main__':
     logger.info('Script started.')

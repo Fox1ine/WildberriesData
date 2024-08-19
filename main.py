@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import pandas as pd
-from my_config import SELENIUM_EXPLICIT_WAIT, headers, service, options
+from config import SELENIUM_EXPLICIT_WAIT, headers, service, options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from pipeline import clear_data,feature_engineering
@@ -11,6 +11,13 @@ from pipeline import clear_data,feature_engineering
 
 # Initialize the logger
 logger = logging.getLogger(__name__)
+
+def logger_value(value, massage_if_exist, massage_if_not_exist):
+    if value:
+        logger.info(massage_if_exist)
+    else:
+        logger.warning(massage_if_not_exist)
+
 
 #Wait until the specified element is visible on the page.
 def sleep_until_visible(driver, locator):
@@ -82,41 +89,22 @@ def get_data(urls_list):
 
             try:
                 item_name = extract_item_data(soup, 'h1', "product-page__title")
-                if item_name:
-                    logger.info(f"Item name is - {item_name}")
-                else:
-                    logger.warning(f"No product name found for URL: {url}")
-
+                logger_value(item_name,'item name collected successfully', 'item name collected UNsuccessfully')
+                
                 item_company_name = extract_item_data(soup, 'a', 'product-page__header-brand j-wba-card-item j-wba-card-item-show j-wba-card-item-observe')
-                if item_company_name:
-                    logger.info(f"The name of the company that released the product is - {item_company_name}")
-                else:
-                    logger.warning(f"This product has no manufacturer")
+                logger_value(item_company_name,'company name collected successfully','company name collected UNsuccessfully')
 
                 item_product_rating = extract_item_data(soup, 'span', "product-review__rating address-rate-mini address-rate-mini--sm")
-                if item_product_rating:
-                    logger.info(f"Product rating is - {item_product_rating}")
-                else:
-                    logger.warning(f"No one has left a review for the product yet")
+                logger_value(item_product_rating,'data product rating collected successfully','data product rating collected UNsuccessfully')
 
                 item_count_reviews = extract_item_data(soup, 'span', 'product-review__count-review j-wba-card-item-show j-wba-card-item-observe')
-                if item_count_reviews:
-                    item_count_reviews_t = ''.join(filter(str.isdigit, item_count_reviews))
-                    logger.info(f"Product already has - {item_count_reviews_t} reviews")
-                else:
-                    logger.warning(f"No one has left a review for the product yet")
+                logger_value(item_count_reviews, 'data quantity reviews collected successfully','data quantity reviews collected UNsuccessfully')
 
                 item_price = extract_item_data(soup, 'ins', "price-block__final-price wallet")
-                if item_price:
-                    logger.info(f"The current price of the product is - {item_price}")
-                else:
-                    logger.warning(f"This product doesn't have a price")
+                logger_value(item_price,'data item price collected successfully','data item price collected UNsuccessfully')
 
                 images_urls = extract_item_data(soup, 'img', 'photo-zoom__preview j-zoom-image hide', multiple=True, get_attr='src')
-                if images_urls:
-                    logger.info(f"Image links are - {images_urls}")
-                else:
-                    logger.warning("Images not found")
+                logger_value(images_urls, 'data images_urls collected successfully', 'data images_urls collected UNsuccessfully')
 
                 result_list.append(
                     {
@@ -124,7 +112,7 @@ def get_data(urls_list):
                         'item_name': item_name,
                         'item_company_name': item_company_name,
                         'item_product_rating': item_product_rating,
-                        'item_count_reviews': item_count_reviews_t,
+                        'item_count_reviews': item_count_reviews,
                         'item_price': item_price,
                         'item_image': images_urls[0] if images_urls else None
                     }
@@ -132,11 +120,14 @@ def get_data(urls_list):
 
             except Exception as err:
                 logger.error(f"Error processing {url}: {err}")
-
-        # Save to CSV
-        df = pd.DataFrame(result_list)
-        df.to_csv("result.csv", index=False, encoding='utf-8', quoting=1) 
-        logger.info("Data successfully saved to 'result.csv'")
+            
+            try:
+                # Save to CSV
+                df = pd.DataFrame(result_list)
+                df.to_csv("result.csv", index=False, encoding='utf-8', quoting=1) 
+                logger.info("Data successfully saved to 'result.csv'")
+            except Exception as err:
+                logger.error(f"Something went wrong, file 'result.csv' - was not completed")
 
 
 def parse_connect(user_value: str):
@@ -154,7 +145,7 @@ def main():
     get_data(urls)
     cleaned_df = clear_data('result.csv')
     if cleaned_df is not None:
-        feature_df = feature_engineering(cleaned_df)
+        feature_engineering(cleaned_df)
     logger.info('Script finished.')
 
 
